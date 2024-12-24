@@ -5,6 +5,14 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new FileInputStream(localPropertiesFile))
+}
+
+def googleMapsApiKey = localProperties.getProperty('googleMapsApiKey', '')
+
 android {
     namespace = "com.hasantoufiqahamed.bound_location_picker_example"
     compileSdk = flutter.compileSdkVersion
@@ -28,6 +36,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders = [
+                googleMapsApiKey: googleMapsApiKey
+        ]
     }
 
     buildTypes {
