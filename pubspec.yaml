@@ -1,0 +1,36 @@
+name: bound_location_picker
+description: "A new Flutter project."
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: ^3.5.4
+  flutter: '>=3.3.0'
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.hasantoufiqahamed.bound_location_picker
+        pluginClass: BoundLocationPickerPlugin
+      ios:
+        pluginClass: BoundLocationPickerPlugin
+      web:
+        pluginClass: BoundLocationPickerWeb
+        fileName: bound_location_picker_web.dart
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  google_maps_flutter: ^2.10.0
+
+  flutter_web_plugins:
+    sdk: flutter
+  web: ^0.5.1
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
