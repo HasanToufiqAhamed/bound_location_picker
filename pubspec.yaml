@@ -16,8 +16,7 @@ flutter:
       ios:
         pluginClass: BoundLocationPickerPlugin
       web:
-        pluginClass: BoundLocationPickerWeb
-        fileName: bound_location_picker_web.dart
+        default_package: BoundLocationPickerPlugin
 
 dependencies:
   flutter:

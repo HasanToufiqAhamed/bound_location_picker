@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
           //   // LatLng(23.820280, 90.365322),
           //   // LatLng(23.822186, 90.364511),
           // ]),
-          // circleBoundary: CircleBoundary(radius: 800),
+          circleBoundary: CircleBoundary(radius: 800),
           enablePickedButton: true,
         ),
       ),
