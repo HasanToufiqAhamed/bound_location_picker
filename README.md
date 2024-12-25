@@ -1,6 +1,6 @@
 # Bound Location Picker for Flutter
 
-A Flutter package created by the official [google_maps_flutter](https://pub.dev/packages/google_maps_flutter) plugin, which can help you to choose locations within a boundary.
+A Flutter package created by the official [google_maps_flutter](https://pub.dev/packages/google_maps_flutter) plugin, which can help you to picked locations within a boundary.
 
 ### Highlighted feature 
 - Pick location within the Polygon boundary

@@ -1,6 +1,6 @@
 name: bound_location_picker
-description: "A new Flutter project."
-version: 0.0.1+1
+description: "A Flutter package created by the official google_maps_flutter plugin, which can help you to picked locations within a boundary."
+version: 0.0.1
 homepage: https://github.com/HasanToufiqAhamed/bound_location_picker
 
 environment:
