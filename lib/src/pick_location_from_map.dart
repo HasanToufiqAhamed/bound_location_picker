@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:bound_location_picker/src/polygon_boundary.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:logger/logger.dart';
 
 import 'circle_boundary.dart';
 import 'map_picker_controller.dart';
@@ -26,6 +27,7 @@ class BoundLocationPicker extends StatefulWidget {
   final ShapeBorder? pickButtonShape;
   final Color pickButtonBackgroundColor;
   final Color disablePickButtonBackgroundColor;
+  final double initialCameraZoom;
 
   const BoundLocationPicker({
     super.key,
@@ -46,6 +48,7 @@ class BoundLocationPicker extends StatefulWidget {
     this.pickButtonShape,
     this.pickButtonBackgroundColor = Colors.blueAccent,
     this.disablePickButtonBackgroundColor = Colors.grey,
+    this.initialCameraZoom = 14.4746,
   });
 
   @override
@@ -54,11 +57,35 @@ class BoundLocationPicker extends StatefulWidget {
 
 class _BoundLocationPickerState extends State<BoundLocationPicker>
     with SingleTickerProviderStateMixin {
+  final logger = Logger();
   MapPickerController mapPickerController = MapPickerController();
 
   late GoogleMapController _controller;
 
   late CameraPosition cameraPosition;
+
+  LatLng centerPoint = LatLng(0, 0);
+
+  late AnimationController animationController;
+  late Animation<double> translateAnimation;
+
+  /// Start of animation when map starts dragging by user, checks the state
+  /// before firing animation, thus optimizing for rendering purposes
+  void mapMoving() {
+    if (!animationController.isAnimating && !animationController.isCompleted) {
+      animationController.forward();
+    }
+  }
+
+  /// down the Pin whenever the map is released and goes to idle position
+  void mapFinishedMoving() {
+    animationController.reverse();
+  }
+
+  LatLng? currentPosition;
+  LatLng? lastPerfectPosition;
+  bool enableToPickLocation = true;
+  int polygonLength = 0;
 
   @override
   void initState() {
@@ -81,40 +108,24 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
         curve: Curves.ease,
       ),
     );
+    polygonLength = countPolygonLength();
+    centerPoint = checkMapCenterPoint();
     cameraPosition = CameraPosition(
-      target: widget.centerPoint,
-      zoom: 14.4746,
+      target: centerPoint,
+      zoom: widget.initialCameraZoom,
     );
   }
-
-  late AnimationController animationController;
-  late Animation<double> translateAnimation;
-
-  /// Start of animation when map starts dragging by user, checks the state
-  /// before firing animation, thus optimizing for rendering purposes
-  void mapMoving() {
-    if (!animationController.isAnimating && !animationController.isCompleted) {
-      animationController.forward();
-    }
-  }
-
-  /// down the Pin whenever the map is released and goes to idle position
-  void mapFinishedMoving() {
-    animationController.reverse();
-  }
-
-  LatLng? currentPosition;
-  LatLng? lastPerfectPosition;
-  bool enableToPickLocation = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: widget.enablePickedButton
           ? FloatingActionButton(
-              onPressed: () {
-                widget.onPickedLocation!(lastPerfectPosition!);
-              },
+              onPressed: enableToPickLocation
+                  ? () {
+                      widget.onPickedLocation!(lastPerfectPosition!);
+                    }
+                  : null,
               backgroundColor: enableToPickLocation
                   ? widget.pickButtonBackgroundColor
                   : widget.disablePickButtonBackgroundColor,
@@ -136,14 +147,14 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                 initialCameraPosition: cameraPosition,
                 onMapCreated: (GoogleMapController controller) {
                   _controller = controller;
-                  lastPerfectPosition = widget.centerPoint;
+                  lastPerfectPosition = centerPoint;
                 },
                 circles: widget.circleBoundary == null
                     ? {}
                     : {
                         Circle(
                           circleId: const CircleId("id"),
-                          center: widget.centerPoint,
+                          center: centerPoint,
                           radius: widget.circleBoundary!.radius,
                           strokeWidth: widget.boundaryWidth,
                           strokeColor: widget.boundaryColor,
@@ -154,15 +165,18 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                     ? {}
                     : widget.polygonBoundary?.polygonList == null
                         ? {}
-                        : {
-                            Polygon(
-                              polygonId: const PolygonId("id"),
-                              points: widget.polygonBoundary?.polygonList ?? [],
-                              strokeWidth: widget.boundaryWidth,
-                              strokeColor: widget.boundaryColor,
-                              fillColor: widget.fillColor,
-                            )
-                          },
+                        : polygonLength <= 2
+                            ? {}
+                            : {
+                                Polygon(
+                                  polygonId: const PolygonId("id"),
+                                  points:
+                                      widget.polygonBoundary?.polygonList ?? [],
+                                  strokeWidth: widget.boundaryWidth,
+                                  strokeColor: widget.boundaryColor,
+                                  fillColor: widget.fillColor,
+                                )
+                              },
                 onCameraMove: (cameraPosition) {
                   this.cameraPosition = cameraPosition;
                   final center = cameraPosition.target;
@@ -186,7 +200,7 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                       lastPerfectPosition = cameraPosition.target;
                     }
                   } else {
-                    if (widget.polygonBoundary != null) {
+                    if ((widget.polygonBoundary != null) && polygonLength > 2) {
                       final isInside = _isPointInPolygon(
                         point: center,
                         polygon: widget.polygonBoundary!.polygonList,
@@ -315,5 +329,39 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
     distance = (12742 * asin(sqrt(a))) * 1000;
 
     return distance;
+  }
+
+  LatLng getCenterPoint(List<LatLng> points) {
+    double totalLat = 0;
+    double totalLng = 0;
+
+    for (LatLng point in points) {
+      totalLat += point.latitude;
+      totalLng += point.longitude;
+    }
+
+    double centerLat = totalLat / points.length;
+    double centerLng = totalLng / points.length;
+
+    return LatLng(centerLat, centerLng);
+  }
+
+  LatLng checkMapCenterPoint() {
+    if (widget.circleBoundary == null && widget.polygonBoundary != null) {
+      if (polygonLength <= 2) {
+        logger.e(
+          "Polygon line error",
+          error:
+              "If you use polygonBoundary, then you must need to provide a polygonList with non repeated more than 2 LatLng.",
+        );
+        return widget.centerPoint;
+      }
+      return getCenterPoint(widget.polygonBoundary!.polygonList);
+    }
+    return widget.centerPoint;
+  }
+
+  int countPolygonLength() {
+    return widget.polygonBoundary?.polygonList.length ?? 0;
   }
 }
