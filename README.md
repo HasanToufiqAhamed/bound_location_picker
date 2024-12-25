@@ -111,3 +111,37 @@ to include the Google Maps JS SDK.
 Check [the `google_maps_flutter_web` README](https://pub.dev/packages/google_maps_flutter_web)
 for the latest information on how to prepare your App to use Google Maps on the
 web.
+
+### Sample Usage
+
+```dart
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: BoundLocationPicker(
+          initialCameraPosition: const LatLng(24.540725, 89.631088),
+          onPickedLocation: (LatLng? location) {
+            ///TODO do something using location 
+          },
+          onLocationUpdateListener: (LatLng? location) {
+            ///TODO do something with current location
+          },
+          locationPickerImage: const AssetImage("assets/pin_point.png"),
+          circleBoundary: CircleBoundary(radius: 800),
+          enablePickedButton: true,
+        ),
+      ),
+    );
+  }
+}
+```

@@ -10,28 +10,67 @@ import 'map_picker_controller.dart';
 import 'map_theme.dart';
 
 class BoundLocationPicker extends StatefulWidget {
-  final LatLng centerPoint;
+  ///initial camera position
+  final LatLng initialCameraPosition;
+
+  ///The callback that is called when the enablePickedButton==true and tapped.
   final Function(LatLng?)? onPickedLocation;
+
+  ///Location picker update listener
+  ///when map moved or ideal the listener updated
   final Function(LatLng?)? onLocationUpdateListener;
+
+  ///circular boundary
   final CircleBoundary? circleBoundary;
+
+  ///polygon boundary
+  ///custom aria boundary
   final PolygonBoundary? polygonBoundary;
+
+  ///location picker marker
   final AssetImage? locationPickerImage;
+
+  ///location picker marker size/height
   final double locationPickerSize;
+
+  ///location picker icon color
   final Color locationPickerColor;
+
+  ///location picker color when disable/try to pick location outside of boundary
   final Color disableLocationPickerColor;
+
+  ///boundary width if boundary exist
   final int boundaryWidth;
+
+  ///boundary color if boundary exist
   final Color boundaryColor;
+
+  ///inside boundary fill color
+  ///boundary highlighted color
   final Color fillColor;
+
+  ///if want to customized the google map theme
+  ///the the [mapTheme] is used
   final String mapTheme;
+
+  ///use [enablePickedButton] if want to enable/disable the pick location button
   final bool enablePickedButton;
+
+  ///pick button shape
   final ShapeBorder? pickButtonShape;
+
+  ///pick button style
   final Color pickButtonBackgroundColor;
+
+  ///pick button style
   final Color disablePickButtonBackgroundColor;
+
+  ///initial camera zom level
   final double initialCameraZoom;
 
   const BoundLocationPicker({
     super.key,
-    required this.centerPoint,
+    required this.initialCameraPosition,
     this.onPickedLocation,
     this.onLocationUpdateListener,
     this.circleBoundary,
@@ -55,19 +94,19 @@ class BoundLocationPicker extends StatefulWidget {
   State<BoundLocationPicker> createState() => _BoundLocationPickerState();
 }
 
-class _BoundLocationPickerState extends State<BoundLocationPicker>
-    with SingleTickerProviderStateMixin {
+class _BoundLocationPickerState extends State<BoundLocationPicker> with SingleTickerProviderStateMixin {
   final logger = Logger();
   MapPickerController mapPickerController = MapPickerController();
 
   late GoogleMapController _controller;
-
   late CameraPosition cameraPosition;
-
-  LatLng centerPoint = LatLng(0, 0);
-
+  LatLng centerPoint = const LatLng(0, 0);
   late AnimationController animationController;
   late Animation<double> translateAnimation;
+  LatLng? currentPosition;
+  LatLng? lastPerfectPosition;
+  bool enableToPickLocation = true;
+  int polygonLength = 0;
 
   /// Start of animation when map starts dragging by user, checks the state
   /// before firing animation, thus optimizing for rendering purposes
@@ -81,11 +120,6 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
   void mapFinishedMoving() {
     animationController.reverse();
   }
-
-  LatLng? currentPosition;
-  LatLng? lastPerfectPosition;
-  bool enableToPickLocation = true;
-  int polygonLength = 0;
 
   @override
   void initState() {
@@ -126,14 +160,10 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                       widget.onPickedLocation!(lastPerfectPosition!);
                     }
                   : null,
-              backgroundColor: enableToPickLocation
-                  ? widget.pickButtonBackgroundColor
-                  : widget.disablePickButtonBackgroundColor,
+              backgroundColor: enableToPickLocation ? widget.pickButtonBackgroundColor : widget.disablePickButtonBackgroundColor,
               shape: widget.pickButtonShape,
               child: Icon(
-                enableToPickLocation
-                    ? Icons.check_rounded
-                    : Icons.close_rounded,
+                enableToPickLocation ? Icons.check_rounded : Icons.close_rounded,
                 color: Colors.white,
               ),
             )
@@ -170,8 +200,7 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                             : {
                                 Polygon(
                                   polygonId: const PolygonId("id"),
-                                  points:
-                                      widget.polygonBoundary?.polygonList ?? [],
+                                  points: widget.polygonBoundary?.polygonList ?? [],
                                   strokeWidth: widget.boundaryWidth,
                                   strokeColor: widget.boundaryColor,
                                   fillColor: widget.fillColor,
@@ -188,8 +217,7 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                     );
 
                     setState(() {
-                      enableToPickLocation =
-                          distance <= widget.circleBoundary!.radius;
+                      enableToPickLocation = distance <= widget.circleBoundary!.radius;
                     });
 
                     setState(() {
@@ -262,19 +290,14 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
                       offset: Offset(0, -15 * translateAnimation.value),
                       child: widget.locationPickerImage != null
                           ? Image(
-                              image: AssetImage(
-                                  widget.locationPickerImage!.assetName),
+                              image: AssetImage(widget.locationPickerImage!.assetName),
                               height: widget.locationPickerSize,
-                              color: enableToPickLocation
-                                  ? null
-                                  : widget.disableLocationPickerColor,
+                              color: enableToPickLocation ? null : widget.disableLocationPickerColor,
                             )
                           : Icon(
                               Icons.location_on,
                               size: widget.locationPickerSize,
-                              color: enableToPickLocation
-                                  ? widget.locationPickerColor
-                                  : widget.disableLocationPickerColor,
+                              color: enableToPickLocation ? widget.locationPickerColor : widget.disableLocationPickerColor,
                             ),
                     );
                   },
@@ -296,12 +319,9 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
       LatLng vertex1 = polygon[i];
       LatLng vertex2 = polygon[(i + 1) % polygon.length];
 
-      if ((vertex1.latitude > point.latitude) !=
-          (vertex2.latitude > point.latitude)) {
-        double intersectLongitude = vertex1.longitude +
-            (point.latitude - vertex1.latitude) *
-                (vertex2.longitude - vertex1.longitude) /
-                (vertex2.latitude - vertex1.latitude);
+      if ((vertex1.latitude > point.latitude) != (vertex2.latitude > point.latitude)) {
+        double intersectLongitude =
+            vertex1.longitude + (point.latitude - vertex1.latitude) * (vertex2.longitude - vertex1.longitude) / (vertex2.latitude - vertex1.latitude);
         if (point.longitude < intersectLongitude) {
           intersections++;
         }
@@ -316,16 +336,11 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
     required num lng,
   }) {
     num distance = 0;
-    LatLng position = widget.centerPoint;
+    LatLng position = widget.initialCameraPosition;
 
     var p = 0.017453292519943295;
     var c = cos;
-    var a = 0.5 -
-        c((position.latitude - lat) * p) / 2 +
-        c(lat * p) *
-            c(position.latitude * p) *
-            (1 - c((position.longitude - lng) * p)) /
-            2;
+    var a = 0.5 - c((position.latitude - lat) * p) / 2 + c(lat * p) * c(position.latitude * p) * (1 - c((position.longitude - lng) * p)) / 2;
     distance = (12742 * asin(sqrt(a))) * 1000;
 
     return distance;
@@ -351,14 +366,13 @@ class _BoundLocationPickerState extends State<BoundLocationPicker>
       if (polygonLength <= 2) {
         logger.e(
           "Polygon line error",
-          error:
-              "If you use polygonBoundary, then you must need to provide a polygonList with non repeated more than 2 LatLng.",
+          error: "If you use polygonBoundary, then you must need to provide a polygonList with non repeated more than 2 LatLng.",
         );
-        return widget.centerPoint;
+        return widget.initialCameraPosition;
       }
       return getCenterPoint(widget.polygonBoundary!.polygonList);
     }
-    return widget.centerPoint;
+    return widget.initialCameraPosition;
   }
 
   int countPolygonLength() {
