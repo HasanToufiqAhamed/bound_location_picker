@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:logger/logger.dart';
 
-import 'circle_boundary.dart';
+import '../bound_location_picker.dart';
 import 'map_picker_controller.dart';
 import 'map_theme.dart';
 
