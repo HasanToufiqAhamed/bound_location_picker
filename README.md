@@ -16,7 +16,7 @@ Made by [@Hasan](https://github.com/HasanToufiqAhamed)
 
 <table>
   <tr>
-        <td>Regular</td>
+        <td>Regular Picker</td>
         <td>Circle Boundary</td>
         <td>Polygon Boundary</td>
     </tr>
