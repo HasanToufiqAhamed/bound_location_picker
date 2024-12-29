@@ -16,15 +16,15 @@ Made by [@Hasan](https://github.com/HasanToufiqAhamed)
 
 <table>
   <tr>
-     <td>Regular</td>
-     <td>Circle Boundary</td>
-     <td>Polygon Boundary</td>
-  </tr>
-  <tr>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/regular_map.gif" width="100%" alt=""></td>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/circle_map.gif" width="100%" alt=""></td>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/polygon_map.gif" width="100%" alt=""></td>
-</tr>
+        <td>Regular</td>
+        <td>Circle Boundary</td>
+        <td>Polygon Boundary</td>
+    </tr>
+    <tr>
+        <td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/regular_map.gif" style="width: 100%; height: 150px; object-fit: cover;" alt=""></td>
+        <td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/circle_map.gif" style="width: 100%; height: 150px; object-fit: cover;" alt="">
+        </td><td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/polygon_map.gif" style="width: 100%; height: 150px; object-fit: cover;" alt=""></td>
+    </tr>
 </table>
 
 ## 💻 Usage
