@@ -21,9 +21,9 @@ Made by [@Hasan](https://github.com/HasanToufiqAhamed)
      <td>Polygon Boundary</td>
   </tr>
   <tr>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/regular_map.gif" width=400 height=867 alt=""></td>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/circle_map.gif" width=400 height=867 alt=""></td>
-<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/polygon_map.gif" width=400 height=867 alt=""></td>
+<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/regular_map.gif" width="100%" alt=""></td>
+<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/circle_map.gif" width="100%" alt=""></td>
+<td><img src="https://raw.githubusercontent.com/HasanToufiqAhamed/bound_location_picker/master/assets/polygon_map.gif" width="100%" alt=""></td>
 </tr>
 </table>
 
